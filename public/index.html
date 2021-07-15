@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <link rel="stylesheet" href="styles.css">
+    <title>Job Search</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.js"
+        integrity="sha256-H+K7U5CnXl1h5ywQfKtSj8PCmoN9aaq30gDh27Xc0jk=" crossorigin="anonymous"></script>
+</head>
+
+<body>
+    <div class="container">
+
+        <div class="row">
+            <div class="column col-md-12">
+                <h1 class="display-1 text-center">Filtered Job Search</h1>
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <div class="col col-md-4">
+                <input type="text" class="form-control " placeholder="Enter job keyword" name="JKeyword" id="jobTitle">
+            </div>
+            <div class="col col-md-4">
+                <input type="text" class="form-control " placeholder="Enter location" name="JLocation" id="jobLocation">
+            </div>
+            <button class="btn btn-primary col col-md-1" id="findJobBtn">Submit</button>
+            
+            <div class="col col-md-2">
+                <input type="text" class="form-control " placeholder="Enter Company" name="company" id="filterCompany">
+            </div>
+            <button class="btn btn-primary col col-md-1" id="filterCompanyBtn">Filter</button>
+        </div>
+
+        
+            
+       
+
+        <div class="col-md-10" id="jobSection">
+
+        </div>
+
+        <script src="displayJobPost.js"></script>
+
+        <script>
+
+            $(document).ready(() => {
+                console.log("JQuery Loaded");
+
+                $("#findJobBtn").click(function () {
+                    // Get Paramaters
+                    const title = document.querySelector("#jobTitle").value;
+                    const location = document.querySelector("#jobLocation").value;
+
+                    console.log(title, location)
+
+                    getJobPosts(title, location);
+                });
+
+                async function getJobPosts(title, location) {
+
+                    console.log("Getting Jobs")
+
+                    // Send a POST request to /jobPost params {Jkeyword, JLocation}
+                    const response = await $.ajax({
+                        url: "/jobPost",
+                        type: "POST",
+                        data: {
+                            "JKeyword": title,
+                            "JLocation": location,
+                        },
+                        success: function (response) {
+                            return response.data
+
+                        },
+                        error: function (response) {
+                            alert("something went wrong");
+                        }
+                    });
+                    // Clean the already existing jobs
+                    $("#jobSection").empty();
+
+                    // add new jobs based off new response
+                    response.forEach((job) => {
+                        const content = `
+                            <div class="card m-4">
+                                    <div class="card-body">
+                                        <div class="row" > 
+                                            <div class="col col-md-2">
+                                                <img src="${job.imageURL}">
+                                            </div>
+                                            <div class="col col-md-10" >
+                                                <h5 class="card-title">${job.title}</h5>
+                                                <h6 class="card-text m-2" >${job.companyName}</h6>
+                                                <h6 class="card-subtitle m-2 text-muted">${job.location}</h6>
+                                                <p class="card-text m-2">${job.datePosted}</p>
+                                                <a href="${job.jobURL}" class="stretched-link"></a>
+                                                <p class="card-text m-2"></p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        jobBoard.innerHTML += content;
+                    })
+                }
+
+            });
+        </script>
+
+        <script src="filterJobPost.js"></script>
+
+
+</body>
+
+</html>
